@@ -22,7 +22,7 @@
     "entry_point": "scythe/__main__.py",
     "mcp_config": {
       "command": "python",
-      "args": ["-m", "scythe"]
+      "args": ["${__dirname}/scythe/__main__.py"]
     }
   },
   "tools": [
