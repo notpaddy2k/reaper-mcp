@@ -1,7 +1,7 @@
 """Smoke tests for Scythe — run with REAPER open and reapy server active.
 
-Tests core functionality across all 16 domains. Every test cleans up
-after itself so REAPER is left in its original state.
+Creates a fresh empty project tab, runs all tests there, then closes it
+so the user's original project is never touched.
 
 Usage:
     python tests/test_smoke.py
@@ -61,6 +61,44 @@ def run_test(name: str, fn):
 
 
 # ---------------------------------------------------------------------------
+# Project isolation — create & teardown a scratch project tab
+# ---------------------------------------------------------------------------
+
+_original_project_name: str = ""
+
+
+def setup_test_project():
+    """Open a new empty project tab for testing.
+
+    REAPER action 41929 = 'New project tab'.  This leaves the user's
+    current project untouched in its own tab.
+    """
+    global _original_project_name
+    _original_project_name = reapy.Project().name or "(untitled)"
+    RPR.Main_OnCommand(41929, 0)  # New project tab
+    # The new (empty) project is now the active one
+    p = reapy.Project()
+    print(f"  Test project created: {p.name or '(empty)'}")
+
+
+def teardown_test_project():
+    """Close the scratch project tab without saving.
+
+    REAPER action 40860 = 'Close current project tab'.
+    We first make sure transport is stopped, then close.
+    """
+    try:
+        RPR.Main_OnCommand(1016, 0)   # Transport: Stop
+        RPR.Main_OnCommand(40860, 0)   # Close current project tab
+        p = reapy.Project()
+        restored = p.name or "(untitled)"
+        print(f"  Restored original project: {restored}")
+    except Exception as e:
+        print(f"  WARNING: Failed to close test project tab: {e}")
+        print(f"  You may need to close the empty tab manually.")
+
+
+# ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
@@ -97,12 +135,10 @@ def test_transport_state():
 
 
 def test_cursor_position():
-    original = project.get_transport_state()["cursor_position"]
     project.set_cursor_position(5.0)
     moved = project.get_transport_state()["cursor_position"]
     assert abs(moved - 5.0) < 0.1, f"Cursor not at 5.0, got {moved}"
-    # Restore
-    project.set_cursor_position(original)
+    project.set_cursor_position(0.0)
 
 
 def test_track_lifecycle():
@@ -228,7 +264,6 @@ def test_send_lifecycle():
 
 def test_marker_lifecycle():
     """Add a marker, list it, then delete it."""
-    # Use a unique position unlikely to collide
     pos = 999.0
     result = markers.add_marker(position=pos, name="__scythe_test__")
     idx = result["index"]
@@ -333,11 +368,13 @@ def test_midi_lifecycle():
 
 
 def test_envelopes():
-    """List envelopes on existing tracks (read-only)."""
-    info = project.get_project_info()
-    if info["n_tracks"] > 0:
-        result = envelopes.list_track_envelopes(track_index=0)
+    """Create a track, list its envelopes (read-only)."""
+    idx = _add_test_track("__scythe_env_test__")
+    try:
+        result = envelopes.list_track_envelopes(track_index=idx)
         assert "envelopes" in result, "Missing 'envelopes' key"
+    finally:
+        _delete_test_track(idx)
 
 
 def test_time_selection():
@@ -406,25 +443,36 @@ def main():
 
     print()
 
-    # Run tests in logical order
-    run_test("project_info", test_project_info)
-    run_test("transport_state", test_transport_state)
-    run_test("cursor_position", test_cursor_position)
-    run_test("list_tracks", test_list_tracks)
-    run_test("track_lifecycle", test_track_lifecycle)
-    run_test("track_fx_lifecycle", test_track_fx_lifecycle)
-    run_test("send_lifecycle", test_send_lifecycle)
-    run_test("marker_lifecycle", test_marker_lifecycle)
-    run_test("region_lifecycle", test_region_lifecycle)
-    run_test("tempo_info", test_tempo_info)
-    run_test("item_lifecycle", test_item_lifecycle)
-    run_test("midi_lifecycle", test_midi_lifecycle)
-    run_test("envelopes", test_envelopes)
-    run_test("time_selection", test_time_selection)
-    run_test("loop", test_loop)
-    run_test("ext_state", test_ext_state)
-    run_test("devices", test_devices)
-    run_test("actions", test_actions)
+    # Create isolated test project
+    print("  Setting up test project...")
+    setup_test_project()
+    print()
+
+    try:
+        # Run tests in logical order
+        run_test("project_info", test_project_info)
+        run_test("transport_state", test_transport_state)
+        run_test("cursor_position", test_cursor_position)
+        run_test("list_tracks", test_list_tracks)
+        run_test("track_lifecycle", test_track_lifecycle)
+        run_test("track_fx_lifecycle", test_track_fx_lifecycle)
+        run_test("send_lifecycle", test_send_lifecycle)
+        run_test("marker_lifecycle", test_marker_lifecycle)
+        run_test("region_lifecycle", test_region_lifecycle)
+        run_test("tempo_info", test_tempo_info)
+        run_test("item_lifecycle", test_item_lifecycle)
+        run_test("midi_lifecycle", test_midi_lifecycle)
+        run_test("envelopes", test_envelopes)
+        run_test("time_selection", test_time_selection)
+        run_test("loop", test_loop)
+        run_test("ext_state", test_ext_state)
+        run_test("devices", test_devices)
+        run_test("actions", test_actions)
+    finally:
+        # Always clean up — close the test tab, restore original project
+        print()
+        print("  Tearing down test project...")
+        teardown_test_project()
 
     # Summary
     passed = sum(1 for _, ok, _ in _results if ok)
