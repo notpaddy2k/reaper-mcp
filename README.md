@@ -48,15 +48,11 @@ The **Actions** tools are an escape hatch — they can trigger *any* REAPER comm
 
 ## Prerequisites
 
-Scythe talks to REAPER through [reapy](https://github.com/RomeoDespwortes/reapy), a Python bridge. Set this up once before installing Scythe.
+Scythe talks to REAPER through [reapy](https://github.com/RomeoDespwortes/reapy), a Python bridge. Three steps to set up — you only do this once.
 
 ### 1. Install Python 3.12
 
-> **Python 3.12 is recommended.** Versions 3.13+ have known compatibility issues with reapy. If you already have 3.12 installed, skip to step 2.
->
-> **Important:** Your Python architecture (32-bit or 64-bit) must match your REAPER installation. Most users run 64-bit REAPER, so install 64-bit Python.
-
-Download Python 3.12 for your platform:
+> **Python 3.12 is recommended.** Versions 3.13+ have known issues with reapy. Your Python architecture (32/64-bit) must match your REAPER installation — most users run 64-bit.
 
 | Platform | Download | Notes |
 |----------|----------|-------|
@@ -65,74 +61,53 @@ Download Python 3.12 for your platform:
 | **macOS** | [Python 3.12.12 (universal)](https://www.python.org/ftp/python/3.12.12/python-3.12.12-macos11.pkg) | Or `brew install python@3.12` |
 | **Linux** | `sudo apt install python3.12` | Or your distro's package manager |
 
-All downloads available at [python.org/downloads](https://www.python.org/downloads/release/python-31212/).
+All downloads at [python.org/downloads](https://www.python.org/downloads/release/python-31212/).
 
-### 2. Configure Python in REAPER
+### 2. Enable Python in REAPER
 
-1. Open REAPER
-2. Go to **Options > Preferences > Plug-Ins > ReaScript**
-3. Check **"Enable Python for use with ReaScript"**
-4. Set the **Python DLL path** — point it to the folder containing the Python shared library:
+1. Open REAPER > **Options > Preferences > Plug-Ins > ReaScript**
+2. Check **"Enable Python for use with ReaScript"**
+3. Set the **Python DLL path** to the folder containing the shared library:
 
-| Platform | Path | DLL / .so / .dylib |
-|----------|------|---------------------|
+| Platform | Path | File |
+|----------|------|------|
 | **Windows** | `C:\Users\<you>\AppData\Local\Programs\Python\Python312\` | `python312.dll` |
 | **macOS (brew)** | `/usr/local/Cellar/python@3.12/.../Frameworks/.../` | `libpython3.12.dylib` |
 | **macOS (pkg)** | `/Library/Frameworks/Python.framework/Versions/3.12/lib/` | `libpython3.12.dylib` |
 | **Linux** | `/usr/lib/python3.12/config-3.12-.../` | `libpython3.12.so` |
 
-5. Click **OK** and **restart REAPER**
+4. Click **OK** and **restart REAPER**
 
-### 3. Install reapy and enable the bridge
+### 3. Connect reapy
 
-In your terminal:
+Install reapy and configure the bridge:
 
 ```bash
 pip install python-reapy
 python -c "import reapy; reapy.configure_reaper()"
 ```
 
-> You'll likely see a `DisabledDistAPIWarning` — that's normal. It means the bridge script was written but hasn't been activated inside REAPER yet.
+Now enable the bridge from inside REAPER:
 
-Now enable it from inside REAPER:
-
-1. Open REAPER
-2. Press **`?`** to open the **Actions** list
-3. Click **New action...** (bottom right) > **New ReaScript...**
-4. Name it `enable_bridge.py` and click Save
-5. Paste this code in the script editor:
+1. Press **`?`** > **New action...** > **New ReaScript...** > name it `enable_bridge.py`
+2. Paste and save (**Ctrl+S** / **Cmd+S**):
    ```python
    import reapy
    reapy.config.enable_dist_api()
    reapy.print("Bridge Enabled! Restart REAPER now.")
    ```
-6. Press **Ctrl+S** (or **Cmd+S** on Mac) to save, then run it
-7. Check the REAPER console — you should see **"Bridge Enabled!"**
-8. **Close REAPER completely and reopen it**
+3. You should see **"Bridge Enabled!"** in the console — **restart REAPER**
+4. After restart, press **`?`**, search for **`reapy`**, and run **"Activate reapy server"**
 
-### 4. Set reapy to start automatically
+> **Tip:** Right-click that action and choose **"Set as startup action"** so it runs automatically every time REAPER opens.
 
-After restarting REAPER:
-
-1. Press **`?`** to open the **Actions** list
-2. Search for **`reapy`**
-3. You should see **"reapy: Activate reapy server"**
-4. Run it once — this starts the bridge so Claude can connect
-
-> **Tip:** Right-click the action and choose **"Set as startup action"** so the bridge starts automatically every time REAPER opens. No manual step needed after that.
-
-### 5. Verify the connection
-
-With REAPER open and the reapy server active, run this in your terminal:
+**Verify it works** — with REAPER open, run:
 
 ```bash
 python -c "import reapy; print(reapy.Project().name)"
 ```
 
-If you see your project name (or an empty string for an untitled project), you're good to go. If you see an error, check:
-- REAPER is running
-- The "Activate reapy server" action was run (or is set as startup action)
-- You're using the same Python 3.12 where reapy is installed
+You should see your project name (or an empty string for untitled projects). If not, check that REAPER is running and the reapy server is active.
 
 ---
 
