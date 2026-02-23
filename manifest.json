@@ -18,11 +18,11 @@
   "license": "MIT",
   "keywords": ["reaper", "daw", "music-production", "audio", "midi", "mixing", "mastering", "scythe"],
   "server": {
-    "type": "uv",
+    "type": "python",
     "entry_point": "scythe/__main__.py",
     "mcp_config": {
-      "command": "uv",
-      "args": ["run", "--directory", "${__dirname}", "python", "-m", "scythe"]
+      "command": "python",
+      "args": ["-m", "scythe"]
     }
   },
   "tools": [
