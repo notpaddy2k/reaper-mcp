@@ -11,7 +11,7 @@ from fastmcp.exceptions import ToolError
 import reapy
 import reapy.reascript_api as RPR
 
-from reaper_mcp.helpers import get_project, undo_block
+from scythe.helpers import get_project, undo_block
 
 mcp = FastMCP("tempo")
 

@@ -8,7 +8,7 @@ from pydantic import Field
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 
-from reaper_mcp.helpers import get_project, undo_block
+from scythe.helpers import get_project, undo_block
 
 mcp = FastMCP("project")
 

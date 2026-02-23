@@ -8,7 +8,7 @@ from pydantic import Field
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 
-from reaper_mcp.helpers import (
+from scythe.helpers import (
     get_project,
     validate_track_index,
     validate_item_index,

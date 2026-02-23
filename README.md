@@ -1,60 +1,143 @@
-# reaper-mcp
+# Scythe
 
-MCP server for controlling [REAPER](https://www.reaper.fm/) DAW from Claude Desktop or Claude Code. Built with [FastMCP 3.x](https://gofastmcp.com/) and [reapy](https://github.com/RomeoDespwortes/reapy).
+> Give Claude full control of your REAPER DAW.
 
-## Features
+Scythe is an MCP server with 82 tools across 16 domains — play, record, mix, edit MIDI, automate, render, and more. Works with Claude Desktop and Claude Code on Windows, macOS, and Linux.
 
-82 tools across 16 domains giving full control over REAPER:
+---
 
-| Domain | Tools | Examples |
-|--------|-------|---------|
-| Project & Transport | 8 | Get project info, play/stop/record, set cursor position, save |
-| Tracks | 10 | List/add/delete tracks, set volume/pan/mute/solo/arm/color |
-| Track FX | 9 | Add/remove FX, get/set parameters, presets, copy FX between tracks |
-| Take FX | 5 | List/add/remove take FX, get/set parameters |
-| Sends & Receives | 6 | List/create/remove sends, set volume/pan/mute |
-| Markers & Regions | 6 | List/add/delete markers and regions, navigate to markers |
-| Tempo & Time Sig | 4 | Get tempo info, add/edit/delete tempo markers |
-| Media Items | 7 | List/add/delete items, set position/length, split items |
-| MIDI | 8 | Create MIDI items, add/edit/delete notes and CC events |
-| Envelopes | 6 | List envelopes, add/delete points, automation items, set mode |
-| Time Selection | 3 | Get/set time selection, toggle loop |
-| Actions | 3 | Execute any REAPER action by ID or name (escape hatch) |
-| Extended State | 3 | Read/write/delete persistent key-value storage |
-| Devices | 2 | List audio and MIDI devices |
-| Render | 2 | Insert media files, render project |
+## What can you do with it?
 
-## Prerequisites
+Ask Claude things like:
 
-- **REAPER** installed and running
-- **Python 3.12+**
-- **reapy** installed and its ReaScript extension enabled inside REAPER
+- *"Add a new track called Bass and set it to -6 dB"*
+- *"List all the FX on track 1 and show me their parameter values"*
+- *"Create a 4-bar MIDI pattern with a C minor chord progression"*
+- *"Add a marker at 30 seconds called Chorus"*
+- *"Set track 3 automation to write mode and add volume envelope points"*
+- *"Mute tracks 4 through 6 and solo track 1"*
+- *"Render the project with the current settings"*
 
-### Setting up reapy in REAPER
+### All 82 tools
 
-1. Install reapy: `pip install python-reapy`
-2. Run `python -c "import reapy; reapy.configure_reaper()"` — this installs the ReaScript helper into REAPER
-3. Restart REAPER
-4. Verify the connection: `python -c "import reapy; print(reapy.Project().name)"`
+| Domain | Tools | What you can do |
+|--------|:-----:|-----------------|
+| **Project & Transport** | 8 | Get project info, play/stop/pause/record, move cursor, save |
+| **Tracks** | 10 | List/add/delete tracks, volume, pan, mute, solo, arm, color |
+| **Track FX** | 9 | Add/remove FX, tweak parameters, browse presets, copy FX chains |
+| **Take FX** | 5 | Same as track FX but for individual item takes |
+| **Sends & Receives** | 6 | Create routing, adjust send levels, mute sends |
+| **Markers & Regions** | 6 | Drop markers, create regions, navigate by marker |
+| **Tempo** | 4 | Read/write tempo markers, change time signatures |
+| **Media Items** | 7 | Add/delete/move/split items on the timeline |
+| **MIDI** | 8 | Create MIDI items, add/edit/delete notes and CC events |
+| **Envelopes** | 6 | Add automation points, set modes (read/write/touch/latch) |
+| **Time Selection** | 3 | Set time selection, toggle loop on/off |
+| **Actions** | 3 | Run *any* REAPER action by ID or name (escape hatch) |
+| **Extended State** | 3 | Persistent key-value storage between sessions |
+| **Devices** | 2 | List audio and MIDI hardware |
+| **Render** | 2 | Insert media files, render/bounce the project |
 
-## Installation
+The **Actions** tools are an escape hatch — they can run *any* REAPER command by its ID, even ones not covered by the other 79 tools.
 
-### Claude Desktop — One-Click (.mcpb)
+---
 
-Download the latest `reaper-mcp.mcpb` from [Releases](https://github.com/notpaddy2k/reaper-mcp/releases) and double-click it. Claude Desktop will install the extension automatically.
+## Setup Guide
 
-Dependencies are handled via [uv](https://docs.astral.sh/uv/) — no manual Python setup needed.
+Scythe talks to REAPER through [reapy](https://github.com/RomeoDespwortes/reapy), a Python bridge. You need to set this up once before installing Scythe.
 
-### Claude Code — Plugin Install
+### Step 1 — Install Python 3.12
+
+> **Use Python 3.12 specifically.** Some users have had issues with 3.13. If you already have 3.12 installed, skip this step.
+
+**Windows:** Download from [python.org/downloads](https://www.python.org/downloads/release/python-3120/) and install. Make sure to check "Add Python to PATH".
+
+**macOS:** `brew install python@3.12`
+
+**Linux:** `sudo apt install python3.12` (or your distro's equivalent)
+
+### Step 2 — Configure Python in REAPER
+
+1. Open REAPER
+2. Go to **Options → Preferences → Plug-Ins → ReaScript**
+3. Check **"Enable Python for use with ReaScript"**
+4. Set the **Python DLL path** to where Python 3.12 is installed:
+   - Windows: `C:\Users\<you>\AppData\Local\Programs\Python\Python312\` with DLL `python312.dll`
+   - macOS: `/usr/local/Cellar/python@3.12/.../Frameworks/.../libpython3.12.dylib`
+   - Linux: `/usr/lib/python3.12/config-3.12-.../libpython3.12.so`
+5. Click **OK** and restart REAPER
+
+### Step 3 — Install reapy and enable the bridge
 
 ```bash
-/plugin marketplace add notpaddy2k/reaper-mcp
-/plugin install reaper-mcp
+pip install python-reapy
+python -c "import reapy; reapy.configure_reaper()"
 ```
 
-This registers the MCP server and any available skills automatically.
+> You may see a `DisabledDistAPIWarning` — that's expected. It means the bridge isn't active in REAPER yet.
 
-### Manual Install
+Now enable it from inside REAPER:
+
+1. Open REAPER
+2. Press **`?`** to open the **Actions** list
+3. Click **New action...** (bottom right) → **New ReaScript...**
+4. Name it `enable_bridge.py` and click Save
+5. Paste this code in the editor:
+   ```python
+   import reapy
+   reapy.config.enable_dist_api()
+   reapy.print("Bridge Enabled! Restart REAPER now.")
+   ```
+6. Press **Ctrl+S** to save and run it
+7. Check the REAPER console — you should see **"Bridge Enabled!"**
+8. **Close REAPER completely and reopen it**
+
+### Step 4 — Set reapy to start automatically
+
+After restarting REAPER:
+
+1. Press **`?`** to open the **Actions** list
+2. Search for **`reapy`**
+3. You should see **"reapy: Activate reapy server"**
+4. Run it — this starts the bridge so Claude can connect
+
+> **Tip:** To avoid running this manually every time, right-click the action and choose **"Set as startup action"** so it runs automatically when REAPER opens.
+
+### Step 5 — Verify it works
+
+With REAPER open and the reapy server active, run this in your terminal:
+
+```bash
+python -c "import reapy; print(reapy.Project().name)"
+```
+
+You should see your project name (or an empty string for an untitled project). If you see an error, make sure:
+- REAPER is running
+- The "Activate reapy server" action has been run
+- Python 3.12 is the version being used
+
+---
+
+## Install Scythe
+
+Pick whichever method matches your setup:
+
+### Claude Desktop (one-click)
+
+Download `scythe.mcpb` from [Releases](https://github.com/notpaddy2k/reaper-mcp/releases) and double-click it. Done.
+
+Python dependencies are handled automatically via [uv](https://docs.astral.sh/uv/).
+
+### Claude Code (plugin)
+
+```
+/plugin marketplace add notpaddy2k/reaper-mcp
+/plugin install scythe
+```
+
+The MCP server and any available skills register automatically.
+
+### Manual
 
 ```bash
 git clone https://github.com/notpaddy2k/reaper-mcp.git
@@ -62,65 +145,80 @@ cd reaper-mcp
 pip install -e .
 ```
 
-Then add to your Claude Desktop config at `%APPDATA%\Claude\claude_desktop_config.json` (Windows) or `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS):
+Add to your Claude Desktop config at `%APPDATA%\Claude\claude_desktop_config.json` (Windows) or `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS):
 
 ```json
 {
   "mcpServers": {
-    "reaper_mcp": {
+    "scythe": {
       "command": "python",
-      "args": ["-m", "reaper_mcp"]
+      "args": ["-m", "scythe"]
     }
   }
 }
 ```
 
-> If `python` doesn't resolve to Python 3.12+, use the full path instead, e.g. `C:\\Users\\you\\AppData\\Local\\Programs\\Python\\Python312\\python.exe`
+---
 
-### Standalone
+## Troubleshooting
 
-```bash
-python -m reaper_mcp
+### `DisabledDistAPIWarning` when running reapy from terminal
+REAPER's bridge isn't active. Open REAPER, press `?`, search for "reapy", and run "Activate reapy server".
+
+### `AttributeError: module 'reapy.reascript_api' has no attribute 'ShowConsoleMsg'`
+Same issue — reapy falls back to "dummy mode" when it can't reach REAPER. Enable the bridge (see Step 3 above).
+
+### Python 3.13 issues
+Some users have reported problems with Python 3.13 and reapy. Use Python 3.12 for a known-good setup.
+
+### REAPER doesn't show "reapy: Activate reapy server" in Actions
+Run `python -c "import reapy; reapy.configure_reaper()"` again, then follow Step 3 to manually create the bridge script inside REAPER.
+
+### Connection works in terminal but not from Claude
+Make sure Claude is using the same Python version where reapy is installed. Check your Claude Desktop config or plugin settings point to Python 3.12.
+
+---
+
+## How it works
+
+Scythe uses [FastMCP 3.x](https://gofastmcp.com/) with a modular architecture — 16 domain modules composed into one server via `mount()`:
+
+```
+scythe/
+├── server.py            # Mounts all 16 domain sub-servers
+├── helpers.py           # Connection, dB conversion, validation
+└── tools/
+    ├── project.py       # Project info & transport
+    ├── tracks.py        # Track management
+    ├── track_fx.py      # Track FX chain
+    ├── take_fx.py       # Take FX chain
+    ├── sends.py         # Routing (sends & receives)
+    ├── markers.py       # Markers & regions
+    ├── tempo.py         # Tempo & time signatures
+    ├── items.py         # Media items
+    ├── midi.py          # MIDI notes & CC
+    ├── envelopes.py     # Automation envelopes
+    ├── time_selection.py# Time selection & loop
+    ├── actions.py       # Action escape hatch
+    ├── ext_state.py     # Key-value storage
+    ├── devices.py       # Audio & MIDI devices
+    └── render.py        # Rendering & media import
 ```
 
-This starts the server on stdio, which any MCP client can connect to.
+Built with [reapy](https://github.com/RomeoDespwortes/reapy) for REAPER communication and [FastMCP](https://gofastmcp.com/) for the MCP protocol.
 
-## Project Structure
-
-```
-reaper-mcp/
-├── manifest.json            # .mcpb packaging manifest (Claude Desktop)
-├── .claude-plugin/          # Claude Code plugin registration
-│   ├── plugin.json
-│   └── marketplace.json
-├── .mcp.json                # Auto-registers MCP server for plugin users
-├── pyproject.toml
-└── reaper_mcp/
-    ├── __init__.py          # Package version
-    ├── __main__.py          # Entry point (python -m reaper_mcp)
-    ├── server.py            # Composes all domain sub-servers via mount()
-    ├── helpers.py           # Shared utilities (connection, dB conversion, validation)
-    └── tools/
-        ├── project.py       # Project info & transport controls
-        ├── tracks.py        # Track management
-        ├── track_fx.py      # Track FX chain
-        ├── take_fx.py       # Take/item FX chain
-        ├── sends.py         # Sends & receives routing
-        ├── markers.py       # Markers & regions
-        ├── tempo.py         # Tempo & time signature markers
-        ├── items.py         # Media items
-        ├── midi.py          # MIDI notes & CC events
-        ├── envelopes.py     # Envelopes & automation
-        ├── time_selection.py# Time selection & loop
-        ├── actions.py       # Action execution (escape hatch)
-        ├── ext_state.py     # Extended state key-value storage
-        ├── devices.py       # Audio & MIDI device info
-        └── render.py        # Rendering & media import
-```
+---
 
 ## Contributing
 
-PRs welcome! Skills are markdown files, tools are Python — both are easy to contribute to.
+PRs welcome! Two ways to contribute:
+
+- **Tools** — Python files in `scythe/tools/`. Add new tools or improve existing ones.
+- **Skills** — Markdown files in `skills/`. Add guided workflows for common production tasks.
+
+If you find a bug or have a feature request, [open an issue](https://github.com/notpaddy2k/reaper-mcp/issues).
+
+---
 
 ## License
 

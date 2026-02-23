@@ -1,11 +1,11 @@
 {
-  "name": "reaper-mcp",
+  "name": "scythe",
   "version": "0.1.0",
-  "description": "REAPER DAW controller — 82 MCP tools for tracks, FX, MIDI, automation, rendering and more. Connects to REAPER via reapy.",
+  "description": "Scythe for REAPER — 82 MCP tools for tracks, FX, MIDI, automation, rendering and more. Give Claude full control of your DAW.",
   "author": {
     "name": "notpaddy2k",
     "url": "https://github.com/notpaddy2k"
   },
   "repository": "https://github.com/notpaddy2k/reaper-mcp",
-  "keywords": ["reaper", "daw", "music-production", "audio", "midi", "mixing", "mastering"]
+  "keywords": ["reaper", "daw", "music-production", "audio", "midi", "mixing", "mastering", "scythe"]
 }

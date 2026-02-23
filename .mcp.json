@@ -1,8 +1,8 @@
 {
   "mcpServers": {
-    "reaper_mcp": {
+    "scythe": {
       "command": "uv",
-      "args": ["run", "--directory", "${CLAUDE_PLUGIN_ROOT}", "python", "-m", "reaper_mcp"]
+      "args": ["run", "--directory", "${CLAUDE_PLUGIN_ROOT}", "python", "-m", "scythe"]
     }
   }
 }
