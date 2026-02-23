@@ -1,6 +1,6 @@
 # reaper-mcp
 
-MCP server for controlling [REAPER](https://www.reaper.fm/) DAW from Claude Desktop (or any MCP client). Built with [FastMCP 3.x](https://gofastmcp.com/) and [reapy](https://github.com/RomeoDespwortes/reapy).
+MCP server for controlling [REAPER](https://www.reaper.fm/) DAW from Claude Desktop or Claude Code. Built with [FastMCP 3.x](https://gofastmcp.com/) and [reapy](https://github.com/RomeoDespwortes/reapy).
 
 ## Features
 
@@ -39,30 +39,20 @@ MCP server for controlling [REAPER](https://www.reaper.fm/) DAW from Claude Desk
 
 ## Installation
 
-### Quick Install (recommended)
+### Claude Desktop — One-Click (.mcpb)
 
-The installer handles everything — creates a virtual environment, installs dependencies, and configures Claude Desktop automatically. Works on macOS, Windows, and Linux.
+Download the latest `reaper-mcp.mcpb` from [Releases](https://github.com/notpaddy2k/reaper-mcp/releases) and double-click it. Claude Desktop will install the extension automatically.
 
-```bash
-git clone https://github.com/notpaddy2k/reaper-mcp.git
-cd reaper-mcp
-python install.py
-```
+Dependencies are handled via [uv](https://docs.astral.sh/uv/) — no manual Python setup needed.
 
-Preview what it will do without making changes:
+### Claude Code — Plugin Install
 
 ```bash
-python install.py --dry-run
+/plugin marketplace add notpaddy2k/reaper-mcp
+/plugin install reaper-mcp
 ```
 
-The installer will:
-1. Install [uv](https://docs.astral.sh/uv/) if not already present
-2. Create a virtual environment in a local cache directory (not inside the repo)
-3. Install all Python dependencies
-4. Test the reapy connection to REAPER (non-fatal if REAPER isn't running)
-5. Add the `reaper_mcp` server to your Claude Desktop config
-
-After it finishes, restart Claude Desktop and the 82 REAPER tools will appear.
+This registers the MCP server and any available skills automatically.
 
 ### Manual Install
 
@@ -98,28 +88,39 @@ This starts the server on stdio, which any MCP client can connect to.
 ## Project Structure
 
 ```
-reaper_mcp/
-├── __init__.py          # Package version
-├── __main__.py          # Entry point (python -m reaper_mcp)
-├── server.py            # Composes all domain sub-servers via mount()
-├── helpers.py           # Shared utilities (connection, dB conversion, validation)
-└── tools/
-    ├── project.py       # Project info & transport controls
-    ├── tracks.py        # Track management
-    ├── track_fx.py      # Track FX chain
-    ├── take_fx.py       # Take/item FX chain
-    ├── sends.py         # Sends & receives routing
-    ├── markers.py       # Markers & regions
-    ├── tempo.py         # Tempo & time signature markers
-    ├── items.py         # Media items
-    ├── midi.py          # MIDI notes & CC events
-    ├── envelopes.py     # Envelopes & automation
-    ├── time_selection.py# Time selection & loop
-    ├── actions.py       # Action execution (escape hatch)
-    ├── ext_state.py     # Extended state key-value storage
-    ├── devices.py       # Audio & MIDI device info
-    └── render.py        # Rendering & media import
+reaper-mcp/
+├── manifest.json            # .mcpb packaging manifest (Claude Desktop)
+├── .claude-plugin/          # Claude Code plugin registration
+│   ├── plugin.json
+│   └── marketplace.json
+├── .mcp.json                # Auto-registers MCP server for plugin users
+├── pyproject.toml
+└── reaper_mcp/
+    ├── __init__.py          # Package version
+    ├── __main__.py          # Entry point (python -m reaper_mcp)
+    ├── server.py            # Composes all domain sub-servers via mount()
+    ├── helpers.py           # Shared utilities (connection, dB conversion, validation)
+    └── tools/
+        ├── project.py       # Project info & transport controls
+        ├── tracks.py        # Track management
+        ├── track_fx.py      # Track FX chain
+        ├── take_fx.py       # Take/item FX chain
+        ├── sends.py         # Sends & receives routing
+        ├── markers.py       # Markers & regions
+        ├── tempo.py         # Tempo & time signature markers
+        ├── items.py         # Media items
+        ├── midi.py          # MIDI notes & CC events
+        ├── envelopes.py     # Envelopes & automation
+        ├── time_selection.py# Time selection & loop
+        ├── actions.py       # Action execution (escape hatch)
+        ├── ext_state.py     # Extended state key-value storage
+        ├── devices.py       # Audio & MIDI device info
+        └── render.py        # Rendering & media import
 ```
+
+## Contributing
+
+PRs welcome! Skills are markdown files, tools are Python — both are easy to contribute to.
 
 ## License
 
