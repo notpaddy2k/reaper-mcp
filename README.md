@@ -1,6 +1,6 @@
 # Scythe
 
-### Talk to your DAW. Claude handles the rest.
+### Make Claude your Reaper assistant.
 
 Scythe connects Claude to [REAPER](https://www.reaper.fm/) through 82 MCP tools across 16 domains. Control playback, manage tracks, tweak FX parameters, write MIDI, automate envelopes, render — all from natural language.
 
