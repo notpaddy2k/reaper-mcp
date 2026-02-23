@@ -1,0 +1,52 @@
+{
+  "manifest_version": "0.3",
+  "name": "reaper-mcp",
+  "display_name": "REAPER DAW Controller",
+  "version": "0.1.0",
+  "description": "82 tools for full control of REAPER DAW — tracks, FX, MIDI, automation, rendering and more",
+  "long_description": "MCP server providing comprehensive control of REAPER DAW via reapy. 82 tools across 16 domains: project/transport, tracks, track FX, take FX, sends/receives, markers/regions, tempo, media items, MIDI notes/CC, envelopes/automation, time selection, actions, extended state, audio/MIDI devices, and rendering.",
+  "author": {
+    "name": "notpaddy2k",
+    "url": "https://github.com/notpaddy2k"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/notpaddy2k/reaper-mcp.git"
+  },
+  "homepage": "https://github.com/notpaddy2k/reaper-mcp",
+  "support": "https://github.com/notpaddy2k/reaper-mcp/issues",
+  "license": "MIT",
+  "keywords": ["reaper", "daw", "music-production", "audio", "midi", "mixing", "mastering"],
+  "server": {
+    "type": "uv",
+    "entry_point": "reaper_mcp/__main__.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": ["run", "--directory", "${__dirname}", "python", "-m", "reaper_mcp"]
+    }
+  },
+  "tools": [
+    { "name": "get_project_info", "description": "Get current project info: name, BPM, time signature, track count, sample rate" },
+    { "name": "get_transport_state", "description": "Get transport state: playing, paused, recording, cursor position" },
+    { "name": "transport_play", "description": "Start playback" },
+    { "name": "transport_stop", "description": "Stop playback" },
+    { "name": "transport_record", "description": "Start recording" },
+    { "name": "list_tracks", "description": "List all tracks with volume, pan, mute, solo, arm status" },
+    { "name": "add_track", "description": "Add a new track" },
+    { "name": "set_track_volume", "description": "Set track volume in dB" },
+    { "name": "list_track_fx", "description": "List all FX on a track" },
+    { "name": "set_track_fx_param", "description": "Set an FX parameter value" },
+    { "name": "list_midi_notes", "description": "List MIDI notes in an item" },
+    { "name": "add_midi_note", "description": "Add a MIDI note" },
+    { "name": "list_track_envelopes", "description": "List automation envelopes on a track" },
+    { "name": "add_envelope_point", "description": "Add an automation envelope point" },
+    { "name": "perform_action", "description": "Execute any REAPER action by command ID (escape hatch)" },
+    { "name": "render_project", "description": "Render project with current render settings" }
+  ],
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "python": ">=3.12"
+    }
+  }
+}
