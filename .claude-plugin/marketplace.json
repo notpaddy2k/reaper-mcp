@@ -5,8 +5,8 @@
   },
   "plugins": [
     {
-      "name": "reaper-mcp",
-      "description": "REAPER DAW controller — 82 MCP tools for tracks, FX, MIDI, automation, rendering and more",
+      "name": "scythe",
+      "description": "Scythe for REAPER — 82 MCP tools for tracks, FX, MIDI, automation, rendering and more",
       "version": "0.1.0",
       "source": "."
     }

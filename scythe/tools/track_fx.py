@@ -10,7 +10,7 @@ from fastmcp.exceptions import ToolError
 import reapy
 import reapy.reascript_api as RPR
 
-from reaper_mcp.helpers import (
+from scythe.helpers import (
     get_project,
     validate_track_index,
     validate_fx_index,

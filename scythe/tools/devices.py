@@ -5,7 +5,7 @@ from __future__ import annotations
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 
-from reaper_mcp.helpers import get_project
+from scythe.helpers import get_project
 
 mcp = FastMCP("devices")
 

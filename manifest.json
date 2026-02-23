@@ -1,10 +1,10 @@
 {
   "manifest_version": "0.3",
-  "name": "reaper-mcp",
-  "display_name": "REAPER DAW Controller",
+  "name": "scythe",
+  "display_name": "Scythe for REAPER",
   "version": "0.1.0",
-  "description": "82 tools for full control of REAPER DAW — tracks, FX, MIDI, automation, rendering and more",
-  "long_description": "MCP server providing comprehensive control of REAPER DAW via reapy. 82 tools across 16 domains: project/transport, tracks, track FX, take FX, sends/receives, markers/regions, tempo, media items, MIDI notes/CC, envelopes/automation, time selection, actions, extended state, audio/MIDI devices, and rendering.",
+  "description": "Give Claude full control of REAPER DAW — 82 tools for tracks, FX, MIDI, automation, rendering and more",
+  "long_description": "Scythe is an MCP server that lets Claude control REAPER DAW via reapy. 82 tools across 16 domains: project/transport, tracks, track FX, take FX, sends/receives, markers/regions, tempo, media items, MIDI notes/CC, envelopes/automation, time selection, actions, extended state, audio/MIDI devices, and rendering.",
   "author": {
     "name": "notpaddy2k",
     "url": "https://github.com/notpaddy2k"
@@ -16,13 +16,13 @@
   "homepage": "https://github.com/notpaddy2k/reaper-mcp",
   "support": "https://github.com/notpaddy2k/reaper-mcp/issues",
   "license": "MIT",
-  "keywords": ["reaper", "daw", "music-production", "audio", "midi", "mixing", "mastering"],
+  "keywords": ["reaper", "daw", "music-production", "audio", "midi", "mixing", "mastering", "scythe"],
   "server": {
     "type": "uv",
-    "entry_point": "reaper_mcp/__main__.py",
+    "entry_point": "scythe/__main__.py",
     "mcp_config": {
       "command": "uv",
-      "args": ["run", "--directory", "${__dirname}", "python", "-m", "reaper_mcp"]
+      "args": ["run", "--directory", "${__dirname}", "python", "-m", "scythe"]
     }
   },
   "tools": [

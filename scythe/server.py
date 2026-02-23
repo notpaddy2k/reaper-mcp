@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from fastmcp import FastMCP
 
-from reaper_mcp.tools import (
+from scythe.tools import (
     actions,
     devices,
     envelopes,
@@ -22,7 +22,7 @@ from reaper_mcp.tools import (
     tracks,
 )
 
-mcp = FastMCP("reaper_mcp")
+mcp = FastMCP("scythe")
 
 # Mount every domain sub-server
 mcp.mount(project.mcp)

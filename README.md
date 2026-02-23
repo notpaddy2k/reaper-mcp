@@ -1,14 +1,12 @@
-# reaper-mcp
+# Scythe
 
-> Give Claude full control of your REAPER DAW — play, record, mix, edit MIDI, automate, render, and more.
+> Give Claude full control of your REAPER DAW.
 
-82 tools across 16 domains. Works with Claude Desktop and Claude Code.
-
-Built with [FastMCP 3.x](https://gofastmcp.com/) and [reapy](https://github.com/RomeoDespwortes/reapy).
+Scythe is an MCP server with 82 tools across 16 domains — play, record, mix, edit MIDI, automate, render, and more. Works with Claude Desktop and Claude Code on Windows, macOS, and Linux.
 
 ---
 
-## What can it do?
+## What can you do with it?
 
 Ask Claude things like:
 
@@ -20,7 +18,7 @@ Ask Claude things like:
 - *"Mute tracks 4 through 6 and solo track 1"*
 - *"Render the project with the current settings"*
 
-### Full tool coverage
+### All 82 tools
 
 | Domain | Tools | What you can do |
 |--------|:-----:|-----------------|
@@ -40,47 +38,106 @@ Ask Claude things like:
 | **Devices** | 2 | List audio and MIDI hardware |
 | **Render** | 2 | Insert media files, render/bounce the project |
 
+The **Actions** tools are an escape hatch — they can run *any* REAPER command by its ID, even ones not covered by the other 79 tools.
+
 ---
 
-## Quick Start
+## Setup Guide
 
-### 1. Set up reapy in REAPER (one time only)
+Scythe talks to REAPER through [reapy](https://github.com/RomeoDespwortes/reapy), a Python bridge. You need to set this up once before installing Scythe.
 
-You need REAPER running with reapy's bridge enabled so Claude can talk to it.
+### Step 1 — Install Python 3.12
+
+> **Use Python 3.12 specifically.** Some users have had issues with 3.13. If you already have 3.12 installed, skip this step.
+
+**Windows:** Download from [python.org/downloads](https://www.python.org/downloads/release/python-3120/) and install. Make sure to check "Add Python to PATH".
+
+**macOS:** `brew install python@3.12`
+
+**Linux:** `sudo apt install python3.12` (or your distro's equivalent)
+
+### Step 2 — Configure Python in REAPER
+
+1. Open REAPER
+2. Go to **Options → Preferences → Plug-Ins → ReaScript**
+3. Check **"Enable Python for use with ReaScript"**
+4. Set the **Python DLL path** to where Python 3.12 is installed:
+   - Windows: `C:\Users\<you>\AppData\Local\Programs\Python\Python312\` with DLL `python312.dll`
+   - macOS: `/usr/local/Cellar/python@3.12/.../Frameworks/.../libpython3.12.dylib`
+   - Linux: `/usr/lib/python3.12/config-3.12-.../libpython3.12.so`
+5. Click **OK** and restart REAPER
+
+### Step 3 — Install reapy and enable the bridge
 
 ```bash
 pip install python-reapy
 python -c "import reapy; reapy.configure_reaper()"
 ```
 
-Restart REAPER, then verify it works:
+> You may see a `DisabledDistAPIWarning` — that's expected. It means the bridge isn't active in REAPER yet.
+
+Now enable it from inside REAPER:
+
+1. Open REAPER
+2. Press **`?`** to open the **Actions** list
+3. Click **New action...** (bottom right) → **New ReaScript...**
+4. Name it `enable_bridge.py` and click Save
+5. Paste this code in the editor:
+   ```python
+   import reapy
+   reapy.config.enable_dist_api()
+   reapy.print("Bridge Enabled! Restart REAPER now.")
+   ```
+6. Press **Ctrl+S** to save and run it
+7. Check the REAPER console — you should see **"Bridge Enabled!"**
+8. **Close REAPER completely and reopen it**
+
+### Step 4 — Set reapy to start automatically
+
+After restarting REAPER:
+
+1. Press **`?`** to open the **Actions** list
+2. Search for **`reapy`**
+3. You should see **"reapy: Activate reapy server"**
+4. Run it — this starts the bridge so Claude can connect
+
+> **Tip:** To avoid running this manually every time, right-click the action and choose **"Set as startup action"** so it runs automatically when REAPER opens.
+
+### Step 5 — Verify it works
+
+With REAPER open and the reapy server active, run this in your terminal:
 
 ```bash
 python -c "import reapy; print(reapy.Project().name)"
 ```
 
-You should see your project name (or an empty string for an untitled project).
+You should see your project name (or an empty string for an untitled project). If you see an error, make sure:
+- REAPER is running
+- The "Activate reapy server" action has been run
+- Python 3.12 is the version being used
 
-### 2. Install the MCP server
+---
+
+## Install Scythe
 
 Pick whichever method matches your setup:
 
-#### Claude Desktop (one-click)
+### Claude Desktop (one-click)
 
-Download `reaper-mcp.mcpb` from [Releases](https://github.com/notpaddy2k/reaper-mcp/releases) and double-click it. Done.
+Download `scythe.mcpb` from [Releases](https://github.com/notpaddy2k/reaper-mcp/releases) and double-click it. Done.
 
 Python dependencies are handled automatically via [uv](https://docs.astral.sh/uv/).
 
-#### Claude Code (plugin)
+### Claude Code (plugin)
 
 ```
 /plugin marketplace add notpaddy2k/reaper-mcp
-/plugin install reaper-mcp
+/plugin install scythe
 ```
 
-The MCP server registers automatically.
+The MCP server and any available skills register automatically.
 
-#### Manual
+### Manual
 
 ```bash
 git clone https://github.com/notpaddy2k/reaper-mcp.git
@@ -88,39 +145,46 @@ cd reaper-mcp
 pip install -e .
 ```
 
-Then add to your Claude Desktop config (`%APPDATA%\Claude\claude_desktop_config.json` on Windows, `~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+Add to your Claude Desktop config at `%APPDATA%\Claude\claude_desktop_config.json` (Windows) or `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS):
 
 ```json
 {
   "mcpServers": {
-    "reaper_mcp": {
+    "scythe": {
       "command": "python",
-      "args": ["-m", "reaper_mcp"]
+      "args": ["-m", "scythe"]
     }
   }
 }
 ```
 
-### 3. Start using it
-
-Open REAPER, restart Claude Desktop (or Claude Code), and start asking Claude to control your session.
-
 ---
 
-## Requirements
+## Troubleshooting
 
-- [REAPER](https://www.reaper.fm/) (any recent version)
-- Python 3.12+
-- [reapy](https://github.com/RomeoDespwortes/reapy) 0.10.0+
+### `DisabledDistAPIWarning` when running reapy from terminal
+REAPER's bridge isn't active. Open REAPER, press `?`, search for "reapy", and run "Activate reapy server".
+
+### `AttributeError: module 'reapy.reascript_api' has no attribute 'ShowConsoleMsg'`
+Same issue — reapy falls back to "dummy mode" when it can't reach REAPER. Enable the bridge (see Step 3 above).
+
+### Python 3.13 issues
+Some users have reported problems with Python 3.13 and reapy. Use Python 3.12 for a known-good setup.
+
+### REAPER doesn't show "reapy: Activate reapy server" in Actions
+Run `python -c "import reapy; reapy.configure_reaper()"` again, then follow Step 3 to manually create the bridge script inside REAPER.
+
+### Connection works in terminal but not from Claude
+Make sure Claude is using the same Python version where reapy is installed. Check your Claude Desktop config or plugin settings point to Python 3.12.
 
 ---
 
 ## How it works
 
-Each tool maps to REAPER's API via reapy. The server uses FastMCP's `mount()` pattern — 16 domain modules composed into one server:
+Scythe uses [FastMCP 3.x](https://gofastmcp.com/) with a modular architecture — 16 domain modules composed into one server via `mount()`:
 
 ```
-reaper_mcp/
+scythe/
 ├── server.py            # Mounts all 16 domain sub-servers
 ├── helpers.py           # Connection, dB conversion, validation
 └── tools/
@@ -141,7 +205,7 @@ reaper_mcp/
     └── render.py        # Rendering & media import
 ```
 
-The **Actions** tools (`perform_action`, `perform_named_action`) are an escape hatch — they can run *any* REAPER command, even ones not wrapped by the other 79 tools.
+Built with [reapy](https://github.com/RomeoDespwortes/reapy) for REAPER communication and [FastMCP](https://gofastmcp.com/) for the MCP protocol.
 
 ---
 
@@ -149,8 +213,10 @@ The **Actions** tools (`perform_action`, `perform_named_action`) are an escape h
 
 PRs welcome! Two ways to contribute:
 
-- **Tools** — Python files in `reaper_mcp/tools/`. Add new tools or improve existing ones.
-- **Skills** — Markdown files in `skills/`. Add guided workflows (coming soon).
+- **Tools** — Python files in `scythe/tools/`. Add new tools or improve existing ones.
+- **Skills** — Markdown files in `skills/`. Add guided workflows for common production tasks.
+
+If you find a bug or have a feature request, [open an issue](https://github.com/notpaddy2k/reaper-mcp/issues).
 
 ---
 
