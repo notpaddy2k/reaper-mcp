@@ -1,8 +1,8 @@
 # Scythe
 
-### Make Claude your Reaper assistant.
+### Make Claude your REAPER assistant.
 
-Scythe connects Claude to [REAPER](https://www.reaper.fm/) through 82 MCP tools across 16 domains. Control playback, manage tracks, tweak FX parameters, write MIDI, automate envelopes, render — all from natural language.
+Scythe connects Claude to [REAPER](https://www.reaper.fm/) through **89 MCP tools** across 17 domains. Control playback, manage tracks, tweak FX parameters, write MIDI, automate envelopes, run scripts, render — all from natural language.
 
 One prompt replaces dozens of clicks.
 
@@ -15,10 +15,29 @@ One prompt replaces dozens of clicks.
 ```
 
 ```
+"Automate the compressor ratio from 4:1 to 8:1 over 4 bars with a linear ramp"
+```
+
+```
 "Solo the drum bus, mute everything else, and render to WAV"
 ```
 
 Works with **Claude Desktop** and **Claude Code** on Windows, macOS, and Linux.
+
+---
+
+## What can it do?
+
+**Anything you'd do with a mouse — but described in words.**
+
+- Set up a session from scratch: tracks, FX chains, routing, templates
+- Write MIDI: chord progressions, drum patterns, melodies, CC automation
+- Mix: adjust levels, pan, EQ, compression, bus routing across any number of tracks
+- Automate: create FX parameter envelopes, set automation modes, add ramps and curves
+- Script: run Lua or EEL code directly inside REAPER when you need the full ReaScript API
+- Manage: markers, regions, tempo changes, time selections, renders
+
+Claude sees your project state, understands context, and chains multiple operations together. Ask for something complex and it figures out the steps.
 
 ---
 
@@ -28,21 +47,32 @@ Works with **Claude Desktop** and **Claude Code** on Windows, macOS, and Linux.
 |--------|:-----:|-----------------|
 | **Project & Transport** | 8 | Play, stop, pause, record, move cursor, get project info, save |
 | **Tracks** | 10 | Add/delete tracks, set volume, pan, mute, solo, arm, color |
-| **Track FX** | 9 | Add/remove FX, tweak parameters, browse presets, copy FX chains |
+| **Track FX** | 10 | Add/remove FX, tweak parameters, browse presets, copy chains, probe display values |
 | **Take FX** | 5 | Same as track FX but scoped to individual item takes |
 | **Sends & Receives** | 6 | Create routing, adjust send levels, mute sends |
 | **Markers & Regions** | 6 | Drop markers, create regions, jump to any marker |
 | **Tempo** | 4 | Read/write tempo markers, change time signatures |
 | **Media Items** | 7 | Add/delete/move/split items on the timeline |
 | **MIDI** | 8 | Create MIDI items, add/edit/delete notes and CC events |
-| **Envelopes** | 6 | Add automation points, set modes (read/write/touch/latch) |
+| **Envelopes** | 10 | Create FX envelopes, add points, set automation modes, bulk insert |
 | **Time Selection** | 3 | Set time selection, toggle loop on/off |
 | **Actions** | 3 | Run *any* REAPER action by command ID or name |
+| **Scripting** | 2 | Execute Lua or EEL2 scripts with optional result return via IPC |
 | **Extended State** | 3 | Persistent key-value storage across sessions |
 | **Devices** | 2 | List audio and MIDI hardware |
 | **Render** | 2 | Insert media files, render/bounce the project |
 
-The **Actions** tools are an escape hatch — they can trigger *any* REAPER command, even ones not covered by the other 79 tools. If REAPER can do it, Scythe can do it.
+The **Scripting** and **Actions** tools are escape hatches — if REAPER can do it, Scythe can do it. Lua scripts have full access to the ReaScript API and can return data back to Claude through an ExtState IPC channel.
+
+---
+
+## Skills (Claude Code)
+
+Skills are pre-built workflows that combine multiple tools into guided, multi-step operations. They run as slash commands in Claude Code.
+
+Skills are where Scythe gets powerful — instead of individual tool calls, a skill can orchestrate an entire mixing session, automate FX parameters across multiple tracks, or generate complex MIDI arrangements from a single prompt.
+
+You can write your own skills as markdown files and contribute them back to the community.
 
 ---
 
@@ -173,29 +203,33 @@ If REAPER can't find your Python DLL, make sure you installed the same architect
 **Connection works in terminal but not from Claude**
 Make sure Claude is using the same Python where reapy is installed. Check your Claude Desktop config or plugin settings point to Python 3.12.
 
+**MCP stops working after restarting REAPER**
+Scythe v0.2.0+ auto-reconnects when it detects a stale connection. If you're on an older version, restart the MCP server after restarting REAPER.
+
 ---
 
 ## How it works
 
-Scythe uses [FastMCP 3.x](https://gofastmcp.com/) with a modular architecture — 16 domain modules composed into one server via `mount()`:
+Scythe uses [FastMCP 3.x](https://gofastmcp.com/) with a modular architecture — 17 domain modules composed into one server via `mount()`:
 
 ```
 scythe/
-├── server.py            # Mounts all 16 domain sub-servers
+├── server.py            # Mounts all 17 domain sub-servers
 ├── helpers.py           # Connection, dB conversion, validation
 └── tools/
     ├── project.py       # Project info & transport
     ├── tracks.py        # Track management
-    ├── track_fx.py      # Track FX chain
+    ├── track_fx.py      # Track FX chain & parameter probing
     ├── take_fx.py       # Take FX chain
     ├── sends.py         # Routing (sends & receives)
     ├── markers.py       # Markers & regions
     ├── tempo.py         # Tempo & time signatures
     ├── items.py         # Media items
     ├── midi.py          # MIDI notes & CC
-    ├── envelopes.py     # Automation envelopes
+    ├── envelopes.py     # Automation envelopes & FX automation
     ├── time_selection.py# Time selection & loop
     ├── actions.py       # Action escape hatch
+    ├── scripting.py     # Lua & EEL script execution
     ├── ext_state.py     # Key-value storage
     ├── devices.py       # Audio & MIDI devices
     └── render.py        # Rendering & media import
@@ -207,9 +241,7 @@ Built with [reapy](https://github.com/RomeoDespwortes/reapy) for REAPER communic
 
 ## Roadmap
 
-Scythe v0.1 is the MCP server foundation. Here's what's coming next:
-
-### Skills (slash commands)
+### Skills
 Pre-built workflows you can trigger from Claude Code:
 - `/scythe:mix` — guided mixing workflow (gain staging, EQ, compression, bus routing)
 - `/scythe:session` — set up a session from scratch (create tracks, load templates, configure I/O)
